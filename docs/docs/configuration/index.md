@@ -47,6 +47,17 @@ mqtt:
   # NOTE: Environment variables that begin with 'FRIGATE_' may be referenced in {}.
   #       eg. password: '{FRIGATE_MQTT_PASSWORD}'
   password: password
+  # Optional: tls_ca_certs for enabling TLS using self-signed certs (default: None)
+  tls_ca_certs: /path/to/ca.crt
+  # Optional: tls_client_cert and tls_client key in order to use self-signed client
+  # certificates (default: None)
+  # NOTE: certificate must not be password-protected
+  #       do not set user and password when using a client certificate
+  tls_client_cert: /path/to/client.crt
+  tls_client_key: /path/to/client.key
+  # Optional: tls_insecure (true/false) for enabling TLS verification of
+  # the server hostname in the server certificate (default: None)
+  tls_insecure: false
   # Optional: interval in seconds for publishing stats (default: shown below)
   stats_interval: 60
 ```
@@ -80,11 +91,6 @@ clips:
   # NOTE: If an object is being tracked for longer than this amount of time, the cache
   #       will begin to expire and the resulting clip will be the last x seconds of the event.
   max_seconds: 300
-  # Optional: size of tmpfs mount to create for cache files (default: not set)
-  # mount -t tmpfs -o size={tmpfs_cache_size} tmpfs /tmp/cache
-  # NOTICE: Addon users must have Protection mode disabled for the addon when using this setting.
-  # Also, if you have mounted a tmpfs volume through docker, this value should not be set in your config.
-  tmpfs_cache_size: 256m
   # Optional: Retention settings for clips (default: shown below)
   retain:
     # Required: Default retention days (default: shown below)
@@ -153,4 +159,26 @@ record:
   enabled: False
   # Optional: Number of days to retain
   retain_days: 30
+```
+
+### `birdseye`
+
+A dynamic combined camera view of all tracked cameras. This is optimized for minimal bandwidth and server resource utilization. Encoding is only performed when actively viewing the video feed, and only active (defined by the mode) cameras are included in the view.
+
+```yaml
+birdseye:
+  # Optional: Enable birdseye view
+  enabled: True
+  # Optional: Width of the output resolution
+  width: 1280
+  # Optional: Height of the output resolution
+  height: 720
+  # Optional: Encoding quality of the mpeg1 feed. 1 is the highest quality, and 31 is the lowest.
+  # Lower quality feeds utilize less CPU resources.
+  quality: 8
+  # Optional: Mode of the view. Available options are: objects, motion, and continuous
+  #   objects - cameras are included if they have had a tracked object within the last 30 seconds
+  #   motion - cameras are included if motion was detected in the last 30 seconds
+  #   continuous - all cameras are included always
+  mode: objects
 ```
